@@ -111,4 +111,8 @@ public class JsonAvroConverter {
             throw new AvroConversionException("Failed to convert to JSON.", e);
         }
     }
+
+    public GenericData.Array<GenericData.Record> convertToGenericDataArray(byte[] data, Schema schema) {
+        return recordReader.readList(data, schema);
+    }
 }

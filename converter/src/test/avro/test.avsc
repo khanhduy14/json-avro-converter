@@ -1,8 +1,22 @@
-{"namespace": "tech.allegro.schema.json2avro.converter",
- "type": "record",
- "name": "SpecificRecordConvertTest",
- "fields": [
-     {"name": "test", "type": "string"},
-     {"name": "enumTest", "type": { "type": "enum", "name": "status", "symbols": ["s1", "s2"]}}
- ]
+{
+  "namespace": "tech.allegro.schema.json2avro.converter",
+  "type": "record",
+  "name": "SpecificRecordConvertTest",
+  "fields": [
+    {
+      "name": "test",
+      "type": "string"
+    },
+    {
+      "name": "enumTest",
+      "type": {
+        "type": "enum",
+        "name": "status",
+        "symbols": [
+          "s1",
+          "s2"
+        ]
+      }
+    }
+  ]
 }

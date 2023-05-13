@@ -29,6 +29,7 @@ import java.util.Map;
 public class CompositeJsonToAvroReader implements JsonToAvroReader {
     private final List<AvroTypeConverter> converters;
     private final AvroTypeConverter mainRecordConverter;
+    private final AvroTypeConverter arrayConverter;
 
     public CompositeJsonToAvroReader() {
         this(Collections.emptyList(), null);
@@ -60,6 +61,7 @@ public class CompositeJsonToAvroReader implements JsonToAvroReader {
      */
     public CompositeJsonToAvroReader(List<AvroTypeConverter> additionalConverters, UnknownFieldListener unknownFieldListener) {
         this.mainRecordConverter = createMainConverter(unknownFieldListener);
+        this.arrayConverter = createArrayConverter();
         this.converters = new ArrayList<>();
         this.converters.addAll(additionalConverters);
         this.converters.add(BytesDecimalConverter.INSTANCE);
@@ -99,15 +101,22 @@ public class CompositeJsonToAvroReader implements JsonToAvroReader {
             path.addLast(field.name());
         }
 
-        AvroTypeConverter converter = this.converters.stream()
-                .filter(c -> c.canManage(schema, path))
-                .findFirst()
-                .orElseThrow(() -> new AvroTypeException("Unsupported type: " + field.schema().getType()));
+        AvroTypeConverter converter = this.converters.stream().filter(c -> c.canManage(schema, path)).findFirst().orElseThrow(() -> new AvroTypeException("Unsupported type: " + field.schema().getType()));
         Object result = converter.convert(field, schema, jsonValue, path, silently);
 
         if (pushed) {
             path.removeLast();
         }
         return result;
+    }
+
+    protected AvroTypeConverter createArrayConverter() {
+        return new ArrayConverter(this);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public GenericData.Array<GenericData.Record> read(List<Map<String, Object>> jsons, Schema schema) {
+        return (GenericData.Array<GenericData.Record>) this.arrayConverter.convert(null, schema, jsons, new ArrayDeque<>(), false);
     }
 }

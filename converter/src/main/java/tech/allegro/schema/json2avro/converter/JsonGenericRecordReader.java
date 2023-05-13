@@ -5,9 +5,12 @@ import org.apache.avro.AvroTypeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.avro.generic.GenericRecord;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class JsonGenericRecordReader {
@@ -47,6 +50,25 @@ public class JsonGenericRecordReader {
     public GenericData.Record read(Map<String, Object> json, Schema schema) {
         try {
             return this.jsonToAvroReader.read(json, schema);
+        } catch (AvroTypeException ex) {
+            throw new AvroConversionException("Failed to convert JSON to Avro: " + ex.getMessage(), ex);
+        } catch (AvroRuntimeException ex) {
+            throw new AvroConversionException("Failed to convert JSON to Avro", ex);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public GenericData.Array<GenericData.Record> readList(byte[] data, Schema schema) {
+        try {
+            return readList(mapper.readValue(data, ArrayList.class), schema);
+        } catch (IOException ex) {
+            throw new AvroConversionException("Failed to parse json to map array list format", ex);
+        }
+    }
+
+    public GenericData.Array<GenericData.Record> readList(List<Map<String, Object>> jsons, Schema schema) {
+        try {
+            return this.jsonToAvroReader.read(jsons, schema);
         } catch (AvroTypeException ex) {
             throw new AvroConversionException("Failed to convert JSON to Avro: " + ex.getMessage(), ex);
         } catch (AvroRuntimeException ex) {

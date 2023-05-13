@@ -4,6 +4,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 
 public interface JsonToAvroReader {
@@ -29,4 +30,13 @@ public interface JsonToAvroReader {
      * @return the converted jsonValue
      */
     Object read(Schema.Field field, Schema schema, Object jsonValue, Deque<String> path, boolean silently);
+
+    /**
+     * convert list of maps to a generic array
+     *
+     * @param jsons the json to convert
+     * @param schema the avro schema to use
+     * @return the converted generic array
+     */
+    GenericData.Array<GenericData.Record> read(List<Map<String, Object>> jsons, Schema schema);
 }
